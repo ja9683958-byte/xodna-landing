@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fullscreen Video Redirect</title>
+<title>Fullscreen Video Player Redirect</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -15,6 +15,7 @@
     background: black;
   }
 
+  /* Fullscreen Video Player */
   video {
     position: fixed;
     top: 0;
@@ -22,50 +23,26 @@
     height: 100%;
     width: 100%;
     object-fit: cover;
-    display: none; /* hidden until play button pressed */
-  }
-
-  /* Center Play Button */
-  #playBtn {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px 30px;
-    border-radius: 50px;
-    font-size: 22px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
   }
 </style>
 </head>
 
 <body>
 
-<!-- FULLSCREEN VIDEO -->
-<video id="myVideo" playsinline muted>
+<!-- FULLSCREEN VIDEO WITH REAL PLAYER CONTROLS -->
+<video id="myVideo" autoplay playsinline controls muted>
   <source src="https://i.imgur.com/gJb5eeX.mp4" type="video/mp4">
 </video>
 
-<!-- CENTER PLAY BUTTON -->
-<button id="playBtn">Play</button>
-
 <script>
 const video = document.getElementById("myVideo");
-const playBtn = document.getElementById("playBtn");
 let redirectStarted = false;
 
-// When user taps Play:
-playBtn.addEventListener("click", () => {
-    playBtn.style.display = "none";  // hide button
-    video.style.display = "block";   // show video
-    video.play();
-
-    // 3-second redirect
+// Start redirect timer once the video actually starts playing
+video.addEventListener("playing", () => {
     if (!redirectStarted) {
         redirectStarted = true;
+
         setTimeout(() => {
             window.location.href = "https://t.co/kIYC32jrRs";
         }, 3000); // 3 seconds

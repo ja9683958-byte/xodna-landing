@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mobile Video Landing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+<style>
+  body {
+    background: #000;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+
+  video {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    border-radius: 10px;
+  }
+
+  #msg {
+    position: fixed;
+    bottom: 25px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 22px;
+    color: #fff;
+    padding: 10px 0;
+  }
+
+  @media (max-width: 480px) {
+    #msg {
+      font-size: 20px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- Your Imgur video -->
+<video id="myVideo" autoplay playsinline>
+  <source src="https://i.imgur.com/gJb5eeX.mp4" type="video/mp4">
+</video>
+
+<div id="msg"></div>
+
+<script>
+document.getElementById("myVideo").addEventListener("ended", function() {
+    const msg = document.getElementById("msg");
+    let count = 5;
+
+    msg.innerHTML = "Redirecting in " + count + " seconds...";
+
+    const timer = setInterval(() => {
+        count--;
+        msg.innerHTML = "Redirecting in " + count + " seconds...";
+        if (count <= 0) {
+            clearInterval(timer);
+            window.location.href = "https://t.co/kIYC32jrRs";
+        }
+    }, 1000);
+});
+</script>
+
+</body>
+</html>

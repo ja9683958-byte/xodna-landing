@@ -2,82 +2,63 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Mobile Video Landing</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fullscreen Video Redirect</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    background: #000;
+  html, body {
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    overflow-x: hidden;
-  }
-
-  /* Clickable Image */
-  .click-img {
+    height: 100%;
     width: 100%;
-    max-width: 380px;
-    border-radius: 12px;
-    margin-top: 15px;
-    cursor: pointer;
+    overflow: hidden;
+    background: black;
   }
 
-  /* Video Style */
   video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
     width: 100%;
-    max-width: 450px;
-    margin-top: 20px;
-    border-radius: 10px;
+    object-fit: cover; /* FULL SCREEN */
   }
 
   #msg {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
     text-align: center;
-    font-size: 22px;
-    color: #fff;
-    padding: 20px 0;
+    color: white;
+    font-size: 20px;
+    font-family: Arial, sans-serif;
   }
 </style>
 </head>
 
 <body>
 
-<!-- CLICKABLE IMAGE USING YOUR GOOGLE DRIVE IMAGE -->
-<img src="https://drive.google.com/uc?export=view&id=1SYQGgm5mznzCyXNDASNeLNwhwQYivV4K"
-     class="click-img"
-     onclick="window.open('https://drive.google.com/file/d/1SYQGgm5mznzCyXNDASNeLNwhwQYivV4K/view?pli=1', '_blank');">
-
-
-<!-- YOUR VIDEO -->
-<video id="myVideo" autoplay playsinline>
+<!-- FULLSCREEN VIDEO -->
+<video id="myVideo" autoplay playsinline muted>
   <source src="https://i.imgur.com/gJb5eeX.mp4" type="video/mp4">
 </video>
 
-<!-- Countdown Message -->
-<div id="msg"></div>
+<div id="msg">Redirecting in 5 seconds...</div>
 
 <script>
-// When the video ends → start 5 sec countdown
-document.getElementById("myVideo").addEventListener("ended", function() {
-    const msg = document.getElementById("msg");
-    let count = 5;
+// 5-second redirect timer
+let seconds = 5;
+const msg = document.getElementById("msg");
 
-    msg.innerHTML = "Redirecting in " + count + " seconds...";
+const timer = setInterval(() => {
+    seconds--;
+    msg.textContent = "Redirecting in " + seconds + " seconds...";
 
-    const timer = setInterval(() => {
-        count--;
-        msg.innerHTML = "Redirecting in " + count + " seconds...";
-        if (count <= 0) {
-            clearInterval(timer);
-
-            // Redirect to AdSterra short link
-            window.location.href = "https://t.co/kIYC32jrRs";
-        }
-    }, 1000);
-});
+    if (seconds <= 0) {
+        clearInterval(timer);
+        window.location.href = "https://t.co/kIYC32jrRs"; // your link
+    }
+}, 1000);
 </script>
 
 </body>

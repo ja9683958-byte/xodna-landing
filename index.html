@@ -1,53 +1,151 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Fullscreen Video Player Redirect</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fullscreen Video -> Redirect</title>
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    background: black;
+  html,body{
+    height:100%;
+    margin:0;
+    background:black;
+    overflow:hidden;
+  }
+  /* fullscreen video */
+  video{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
   }
 
-  /* Fullscreen Video Player */
-  video {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
+  /* fallback overlay when autoplay is blocked */
+  .overlay {
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:1rem;
+    background:rgba(0,0,0,0.45);
+    color:#fff;
+    font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    z-index:10;
+    padding:2rem;
+    text-align:center;
+  }
+  .big-btn {
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.18);
+    color:#fff;
+    padding:0.8rem 1.2rem;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:1rem;
   }
 </style>
 </head>
-
 <body>
 
-<!-- FULLSCREEN VIDEO WITH REAL PLAYER CONTROLS -->
-<video id="myVideo" autoplay playsinline controls muted>
-  <source src="https://drive.google.com/file/d/1Ej0f4zNkuegJpH9H8D485O7Bmu153h86/view" type="video/mp4">
+<!-- Replace the src below with your direct-download Drive link if different -->
+<video id="myVideo" playsinline muted preload="auto" webkit-playsinline>
+  <!-- Direct-download Google Drive URL (required to actually stream the file) -->
+  <source src="https://drive.google.com/uc?export=download&id=1Ej0f4zNkuegJpH9H8D485O7Bmu153h86" type="video/mp4">
+  Your browser does not support the video tag.
 </video>
 
+<!-- overlay shown only if autoplay is blocked -->
+<div id="overlay" class="overlay" style="display:none;">
+  <div>
+    <div style="font-size:1.25rem; margin-bottom:1rem;">Tap/click to play video</div>
+    <button id="playButton" class="big-btn">Play</button>
+    <div style="font-size:0.85rem; margin-top:0.75rem; opacity:0.9;">
+      The video must be muted for autoplay on many browsers. It will redirect 5 seconds after playback starts.
+    </div>
+  </div>
+</div>
+
 <script>
-const video = document.getElementById("myVideo");
-let redirectStarted = false;
+(function(){
+  const video = document.getElementById('myVideo');
+  const overlay = document.getElementById('overlay');
+  const playBtn = document.getElementById('playButton');
+  const redirectUrl = "https://t.co/T7PxVGFLWh";
+  const REDIRECT_AFTER_MS = 5000; // redirect 5 seconds after playback begins
+  let redirectTimer = null;
+  let redirectStarted = false;
 
-// Start redirect timer once the video actually starts playing
-video.addEventListener("playing", () => {
-    if (!redirectStarted) {
-        redirectStarted = true;
+  // Ensure muted (required for autoplay on many browsers)
+  video.muted = true;
 
-        setTimeout(() => {
-            window.location.href = "https://t.co/kIYC32jrRs";
-        }, 3000); // 3 seconds
+  function startRedirectTimer() {
+    if (redirectStarted) return;
+    redirectStarted = true;
+    // clear any existing timer just in case
+    if (redirectTimer) clearTimeout(redirectTimer);
+    redirectTimer = setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, REDIRECT_AFTER_MS);
+  }
+
+  function cancelRedirectTimer() {
+    if (redirectTimer) {
+      clearTimeout(redirectTimer);
+      redirectTimer = null;
     }
-});
+    redirectStarted = false;
+  }
+
+  // Start timer when playing event fires (reliable)
+  video.addEventListener('playing', () => {
+    startRedirectTimer();
+  });
+
+  // If video is paused or ended before timer fires, cancel redirect
+  video.addEventListener('pause', cancelRedirectTimer);
+  video.addEventListener('ended', cancelRedirectTimer);
+  video.addEventListener('seeking', cancelRedirectTimer);
+
+  // Try to autoplay programmatically. Many browsers allow autoplay if muted.
+  function tryAutoPlay() {
+    const p = video.play();
+    if (p !== undefined) {
+      p.then(() => {
+        // autoplay succeeded — overlay not needed
+        overlay.style.display = 'none';
+        // If 'playing' already fired it will start the timer. If not, ensure we start it.
+        // (playing event is usually fired shortly after)
+      }).catch((err) => {
+        // autoplay blocked by browser — show overlay to require user interaction
+        overlay.style.display = 'flex';
+        console.warn('Autoplay blocked, showing play button. Reason:', err && err.message);
+      });
+    } else {
+      // older browsers may not return a promise; assume it started
+      overlay.style.display = 'none';
+    }
+  }
+
+  // If user clicks play button, play and hide overlay
+  playBtn.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    video.muted = true; // keep muted to maintain autoplay-friendly behavior
+    video.play().catch(err => {
+      console.error('Play attempt failed after user interaction:', err);
+    });
+  });
+
+  // Try autoplay on load
+  window.addEventListener('load', tryAutoPlay);
+
+  // As a fallback also try after a short delay (sometimes network delays)
+  setTimeout(tryAutoPlay, 600);
+
+  // Optional: if you want visible controls for debugging, remove/comment the next line
+  // video.controls = true;
+
+})();
 </script>
 
 </body>
